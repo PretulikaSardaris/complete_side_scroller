@@ -23,8 +23,17 @@ constructor(){
         e.key === 'ArrowRight')
           && this.keys.indexOf(e.key) === -1){
             this.keys.push(e.key);
+
           } else if( e.key === 'Enter' && gameOver) restartGame();
           
+
+          }  else if( e.key === 'Enter' && gameOver) {
+            setTimeout(function() {
+              location.reload();
+          }, 3000);
+          animate(0);
+          }
+
        });
        window.addEventListener('keyup' , e => {
         if( e.key === 'ArrowDown' ||
@@ -215,7 +224,10 @@ constructor(){
     }
     
     function displayStatusText(context) {
- context.textAlign ='left'
+
+
+     context.textAlign = 'left'
+
       context.font = '40px  Helvetica';
       context.fillStyle = 'white';
       context.fillText('Score: ' + score, 20, 50)
@@ -225,13 +237,18 @@ constructor(){
         context.textAlign= 'center';
         context.font = '40px  Helvetica';
       context.fillStyle = 'white';
+
       context.fillText('Game Over: Press Enter or swipe down to restart ' + score, canvas.width/2 , 200)
       context.fillStyle = 'black';
       context.fillText('Game Over: Press Enter or swipe down to restart ' + score,canvas.width/2 + 2 , 202)
+      context.fillText('Game Over: press Enter to restart ' + score, canvas.width/2 , 200)
+      context.fillStyle = 'black';
+      context.fillText('Game Over: press Enter to restart  ' + score,canvas.width/2 + 2 , 202)
+
             }
     }
 
-    const input = new InputHandler()
+        const input = new InputHandler()
     const player = new Player(canvas.width, canvas.height);
     const background = new Background(canvas.width, canvas.height)
     
