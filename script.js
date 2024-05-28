@@ -10,7 +10,7 @@ window.addEventListener('load' , function(){
     let enemies = [];
     let score = 0;
     let gameOver = false;
-
+  const fullScreen = document.getElementById('fullScreen')
 
  
     class InputHandler{
@@ -23,12 +23,17 @@ constructor(){
         e.key === 'ArrowRight')
           && this.keys.indexOf(e.key) === -1){
             this.keys.push(e.key);
+
+          } else if( e.key === 'Enter' && gameOver) restartGame();
+          
+
           }  else if( e.key === 'Enter' && gameOver) {
             setTimeout(function() {
               location.reload();
           }, 3000);
           animate(0);
           }
+
        });
        window.addEventListener('keyup' , e => {
         if( e.key === 'ArrowDown' ||
@@ -37,8 +42,25 @@ constructor(){
         e.key === 'ArrowRight'){
             this.keys.splice(this.keys.indexOf(e.key), 1);
         }
-         
-       })
+         })
+
+         window.addEventListener('touchstart' , e => {
+          this.touchY = e.changedTouches[0].pageY
+         })
+         window.addEventListener('touchmove' , e => {
+          const swipeDistance = e.changedTouches[0].pageY - this.touchY;
+          if(swipeDistance < -this.touchThreshhold && this.keys.indexOf('swipe up ') === -1) this.keys.push('swipe up')
+            else if(swipeDistance > this.touchThreshhold && this.keys.indexOf('swipe down') === -1){
+           this.keys.push('swipe down');
+           if(gameOver) restartGame()
+            }
+         })
+         window.addEventListener('touchend' , e => {
+          this.keys.splice(this.keys.indexOf('swipe up') , 1); 
+          this.keys.splice(this.keys.indexOf('swipe down') , 1); 
+
+          
+         })
 }
     }
     class Player{
@@ -68,10 +90,10 @@ constructor(){
         }
         update(input, deltaTime, enemies) {
           enemies.forEach( enemy => {
-            const dx = (enemy.x + enemy.width/2) -(this.x + this.width/2);
-            const dy = (enemy.y + enemy.height/2) - (this.y + this.height/2);
+            const dx = (enemy.x + enemy.width/2 - 20 ) -(this.x + this.width/2);
+            const dy = (enemy.y + enemy.height/2) - (this.y + this.height/2 +20);
             const distance = Math.sqrt(dx * dx + dy * dy);
-            if(distance < enemy.width/2 + this.width/2){
+            if(distance < enemy.width/3 + this.width/3){
               gameOver = true;
             }
           })
@@ -90,7 +112,7 @@ constructor(){
                 this.speed = 5;
             } else if(input.keys.indexOf('ArrowLeft') > -1){
                 this.speed = -5;
-            }else if(input.keys.indexOf('ArrowUp') > -1 && this.onGround()){
+            }else if((input.keys.indexOf('ArrowUp') > -1 || input.keys.indexOf('swipe up')  > -1 ) && this.onGround()){
                 this.vy -= 30;
             }
             else {
@@ -202,7 +224,10 @@ constructor(){
     }
     
     function displayStatusText(context) {
+
+
      context.textAlign = 'left'
+
       context.font = '40px  Helvetica';
       context.fillStyle = 'white';
       context.fillText('Score: ' + score, 20, 50)
@@ -212,9 +237,14 @@ constructor(){
         context.textAlign= 'center';
         context.font = '40px  Helvetica';
       context.fillStyle = 'white';
+
+      context.fillText('Game Over: Press Enter or swipe down to restart ' + score, canvas.width/2 , 200)
+      context.fillStyle = 'black';
+      context.fillText('Game Over: Press Enter or swipe down to restart ' + score,canvas.width/2 + 2 , 202)
       context.fillText('Game Over: press Enter to restart ' + score, canvas.width/2 , 200)
       context.fillStyle = 'black';
       context.fillText('Game Over: press Enter to restart  ' + score,canvas.width/2 + 2 , 202)
+
             }
     }
 
@@ -227,6 +257,25 @@ constructor(){
     let enemyInterval = 1000;
     let randomEnemyInterval = Math.random() * 1000 + 500;
 
+    function restartGame(){
+        setTimeout(function() {
+          location.reload();
+      }, 3000);
+      animate(0);
+      
+    }
+    function toggleFullScreen(){
+      if(!document.fullscreenElement){
+        canvas.requestFullscreen().catch(err => {
+          alert(`Error : ${err.message}`)
+        })
+      }
+      else{ 
+        document.exitFullscreen()
+      }
+    }
+    fullScreen.addEventListener('click' , toggleFullScreen) 
+   
     function animate(timeStamp){
            const deltaTime = timeStamp - lastTime
            lastTime = timeStamp;
